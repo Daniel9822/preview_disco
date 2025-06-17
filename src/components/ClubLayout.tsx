@@ -3,10 +3,36 @@
 import type React from "react";
 import { SeatComponent } from "./SeatComponent";
 import { ReservationModal } from "./ReservationModal";
+// import Image from "next/image";
 
 export const ClubLayout: React.FC = () => {
   return (
-    <div className="w-full h-screen bg-gray-900 relative">
+    <div className="w-full h-screen bg-black relative">
+      <div className="absolute inset-0 bg-black flex items-center justify-center">
+  <img
+    src="/bg.jpg"
+    alt="Background"
+    className="max-h-full max-w-full object-contain"
+    style={{
+      WebkitMaskImage: `
+        radial-gradient(circle at center, 
+          rgba(0,0,0,1) 60%, 
+          rgba(0,0,0,0) 100%)
+      `,
+      maskImage: `
+        radial-gradient(circle at center, 
+          rgba(0,0,0,1) 60%, 
+          rgba(0,0,0,0) 100%)
+      `,
+      WebkitMaskRepeat: "no-repeat",
+      maskRepeat: "no-repeat",
+      WebkitMaskSize: "100% 100%",
+      maskSize: "100% 100%",
+    }}
+  />
+</div>
+
+
       {/* Header */}
       <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-20 bg-black/80 p-2 rounded-lg">
         <h1 className="text-2xl md:text-4xl font-bold text-white text-center mb-1">
@@ -44,7 +70,7 @@ export const ClubLayout: React.FC = () => {
       <div className="absolute inset-0 pt-20 pb-4 overflow-auto">
         <div className="min-w-[1300px] h-full px-4">
           <div
-            className="relative w-full h-full mx-auto bg-gray-100 border-4 border-gray-800 rounded-lg"
+            className="relative w-full h-full mx-auto  rounded-lg"
             style={{ width: "1280px", height: "720px" }}
           >
             {/* VIP TOP BORDER - Recuadro negro superior */}
