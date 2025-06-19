@@ -24,7 +24,6 @@ export default function AdminDashboard() {
     // setSelectedDate,
   } = useAdminStore();
 
-  console.log('Yo',session)
   // Redirect si no está autenticado
   useEffect(() => {
     if (status === "loading") return;

@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       stage: body.stage,
       customerFullName: body.customerFullName,
       customerPhoneNumber: body.customerPhoneNumber,
-      reservationDate: new Date(body.date || Date.now())
+      reservationDate: new Date(body.date || Date.now()).toISOString()
     };
 
     reservations.push(newReservation);
