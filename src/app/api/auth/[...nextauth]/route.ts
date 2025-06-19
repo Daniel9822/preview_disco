@@ -1,15 +1,10 @@
-import { clsx, type ClassValue } from "clsx";
-import { NextAuthOptions } from "next-auth";
-import { twMerge } from "tailwind-merge";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { cookies } from "next/headers";
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+const BASE_API = process.env.NEXT_PUBLIC_BASE_URL
 
-const BASE_API = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-export const authOptions: NextAuthOptions = {
+const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -17,34 +12,45 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
         userAgent: { label: "Password", type: "password" },
+        phoneNumber: { label: "Phone Number", type: "text" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.phoneNumber || !credentials?.password) {
           return null;
         }
 
         try {
-          const response = await fetch(`${BASE_API}/api/v1/auth/sign-in`, {
+          const response = await fetch(`${BASE_API}/auth/login`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               "User-agent": credentials.userAgent,
             },
             body: JSON.stringify({
-              email: credentials.email,
+              phoneNumber: credentials.phoneNumber,
               password: credentials.password,
             }),
           });
 
+
           const data = await response.json();
-          console.log(data);
-          if (data.data.token) {
+          console.log('res',data);
+          if (data.access_token) {
+            const cookieStore = await cookies();
+            cookieStore.set("user-agent", credentials.userAgent, {
+              httpOnly: false,
+              sameSite: "lax",
+              // secure: process.env.NODE_ENV === "production",
+              path: "/",
+            });
             return {
-              id: data.id?.toString() || "user-id", // Asegúrate de que `id` sea una string
-              email: data.email || credentials.email,
-              name: data.name || credentials.email,
-              accessToken: data.data.token, // Usa `accessToken` en lugar de `token`
+              id: data.user.id?.toString() || "user-id", // Asegúrate de que `id` sea una string
+            //   email: data.email || credentials.email,
+              name: data.user.name || credentials.email,
+              accessToken: data.access_token, // Usa `accessToken` en lugar de `token`
               // isAdmin: data.response.isAdmin,
+              lastName: data.user.lastName || "",
+              phoneNumber: data.user.phoneNumber || "",
             };
           }
           return null;
@@ -75,12 +81,11 @@ export const authOptions: NextAuthOptions = {
         name: token.name,
         isAdmin: token.isAdmin ?? false,
         lastName: typeof token.lastName === "string" ? token.lastName : "",
-        phoneNumber:
-          typeof token.phoneNumber === "string" ? token.phoneNumber : "",
+        phoneNumber: typeof token.phoneNumber === "string" ? token.phoneNumber : "",
       };
       session.accessToken = token.accessToken;
       session.isAdmin = token.isAdmin;
-
+      
       return session;
     },
   },
@@ -89,3 +94,8 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET || "your-fallback-secret",
 };
+
+// ✅ Exporta el handler correctamente
+const handler = NextAuth(authOptions);
+
+export { handler as GET, handler as POST }; // ✅ Esto es correcto en la App Router

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
 import {
   type ClubLayoutState,
@@ -7,6 +6,9 @@ import {
   type ReservationFormData,
   type SeatStatus,
 } from "@/types";
+import { toast } from "sonner";
+
+const api = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3001/api";
 
 export const useClubStore = create<ClubLayoutState & ClubLayoutActions>(
   (set, get) => ({
@@ -29,7 +31,7 @@ export const useClubStore = create<ClubLayoutState & ClubLayoutActions>(
 
       // Resetear cualquier asiento previamente seleccionado
       const updatedStatuses = { ...seatStatuses };
-      Object.keys(updatedStatuses).forEach(id => {
+      Object.keys(updatedStatuses).forEach((id) => {
         if (updatedStatuses[id] === "selected") {
           updatedStatuses[id] = "available";
         }
@@ -45,7 +47,8 @@ export const useClubStore = create<ClubLayoutState & ClubLayoutActions>(
       });
     },
 
-    reserveSeat: async (formData: ReservationFormData) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    reserveSeat: async (request: any, formData: ReservationFormData) => {
       const { selectedSeat, seatStatuses } = get();
       if (!selectedSeat) return;
 
@@ -57,21 +60,33 @@ export const useClubStore = create<ClubLayoutState & ClubLayoutActions>(
           stage: selectedSeat.section,
           customerFullName: formData.fullName,
           customerPhoneNumber: formData.phoneNumber,
-          date: new Date(),
+          reservationDate: new Date(),
         };
 
         // Llamada al API
-        const response = await fetch("/api/reservations", {
+        request(`${api}/reservations`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(reservation),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        }).then((response: any) => {
+          if (response?.id) {
+            toast.success("¡Reserva realizada exitosamente!", {
+              description: `Asiento ${selectedSeat?.seatNumber} en ${selectedSeat?.section} reservado para ${formData.fullName}`,
+            });
+            return;
+          }
+
+          toast.error("Error al realizar la reserva", {
+            description: "Por favor intenta nuevamente",
+          });
         });
 
-        if (!response.ok) {
-          throw new Error("Error al realizar la reserva");
-        }
+        // if (!response.ok) {
+        //   throw new Error("Error al realizar la reserva");
+        // }
 
         // Actualizar estado local
         const updatedStatuses = { ...seatStatuses };

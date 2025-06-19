@@ -1,43 +1,46 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-'use client';
+"use client";
 
-import type React from 'react';
-import { useState } from 'react';
+import type React from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useClubStore } from '@/store/clubStore';
-import type { ReservationFormData } from '@/types';
-import { toast } from 'sonner';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useClubStore } from "@/store/clubStore";
+import type { ReservationFormData } from "@/types";
+import { toast } from "sonner";
+import { useApiClient } from "@/lib/hooks/authClient";
 
 export const ReservationModal: React.FC = () => {
-  const { selectedSeat, isModalOpen, isLoading, reserveSeat, closeModal } = useClubStore();
+  const { selectedSeat, isModalOpen, isLoading, reserveSeat, closeModal } =
+    useClubStore();
   const [formData, setFormData] = useState<ReservationFormData>({
-    fullName: '',
-    phoneNumber: ''
+    fullName: "",
+    phoneNumber: "",
   });
+  const { request } = useApiClient();
   const [errors, setErrors] = useState<Partial<ReservationFormData>>({});
 
   const validateForm = (): boolean => {
     const newErrors: Partial<ReservationFormData> = {};
 
     if (!formData.fullName.trim()) {
-      newErrors.fullName = 'El nombre completo es requerido';
+      newErrors.fullName = "El nombre completo es requerido";
     } else if (formData.fullName.trim().length < 2) {
-      newErrors.fullName = 'El nombre debe tener al menos 2 caracteres';
+      newErrors.fullName = "El nombre debe tener al menos 2 caracteres";
     }
 
     if (!formData.phoneNumber.trim()) {
-      newErrors.phoneNumber = 'El número de teléfono es requerido';
+      newErrors.phoneNumber = "El número de teléfono es requerido";
     } else if (!/^\+?[\d\s\-\(\)]{10,}$/.test(formData.phoneNumber.trim())) {
-      newErrors.phoneNumber = 'Formato de teléfono inválido';
+      newErrors.phoneNumber = "Formato de teléfono inválido";
     }
 
     setErrors(newErrors);
@@ -50,37 +53,34 @@ export const ReservationModal: React.FC = () => {
     if (!validateForm()) return;
 
     try {
-      await reserveSeat(formData);
-      toast.success('¡Reserva realizada exitosamente!', {
-        description: `Asiento ${selectedSeat?.seatNumber} en ${selectedSeat?.section} reservado para ${formData.fullName}`
-      });
+      await reserveSeat(request, formData);
 
       // Limpiar formulario
-      setFormData({ fullName: '', phoneNumber: '' });
+      setFormData({ fullName: "", phoneNumber: "" });
       setErrors({});
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error: any) {
-      toast.error('Error al realizar la reserva', {
-        description: 'Por favor intenta nuevamente'
+      toast.error("Error al realizar la reserva", {
+        description: "Por favor intenta nuevamente",
       });
     }
   };
 
   const handleClose = () => {
     closeModal();
-    setFormData({ fullName: '', phoneNumber: '' });
+    setFormData({ fullName: "", phoneNumber: "" });
     setErrors({});
   };
 
   const getSectionDisplayName = (section: string) => {
     const sectionNames: Record<string, string> = {
-      'vip-left': 'VIP Izquierda',
-      'vip-top': 'VIP Superior',
-      'vip-right': 'VIP Derecha',
-      'general': 'Zona General',
-      'bar': 'Barra',
-      'dj': 'Área DJ',
-      'entrance': 'Entrada'
+      "vip-left": "VIP Izquierda",
+      "vip-top": "VIP Superior",
+      "vip-right": "VIP Derecha",
+      general: "Zona General",
+      bar: "Barra",
+      dj: "Área DJ",
+      entrance: "Entrada",
     };
     return sectionNames[section] || section;
   };
@@ -93,7 +93,8 @@ export const ReservationModal: React.FC = () => {
         <DialogHeader>
           <DialogTitle>Reservar Asiento</DialogTitle>
           <DialogDescription>
-            Asiento #{selectedSeat.seatNumber} en {getSectionDisplayName(selectedSeat.section)}
+            Asiento #{selectedSeat.seatNumber} en{" "}
+            {getSectionDisplayName(selectedSeat.section)}
           </DialogDescription>
         </DialogHeader>
 
@@ -105,8 +106,10 @@ export const ReservationModal: React.FC = () => {
               type="text"
               placeholder="Ej: Juan Pérez"
               value={formData.fullName}
-              onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-              className={errors.fullName ? 'border-red-500' : ''}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, fullName: e.target.value }))
+              }
+              className={errors.fullName ? "border-red-500" : ""}
               disabled={isLoading}
             />
             {errors.fullName && (
@@ -121,8 +124,13 @@ export const ReservationModal: React.FC = () => {
               type="tel"
               placeholder="Ej: +1 809 772 1170"
               value={formData.phoneNumber}
-              onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
-              className={errors.phoneNumber ? 'border-red-500' : ''}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  phoneNumber: e.target.value,
+                }))
+              }
+              className={errors.phoneNumber ? "border-red-500" : ""}
               disabled={isLoading}
             />
             {errors.phoneNumber && (
@@ -140,12 +148,8 @@ export const ReservationModal: React.FC = () => {
             >
               Cancelar
             </Button>
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="flex-1"
-            >
-              {isLoading ? 'Reservando...' : 'Reservar'}
+            <Button type="submit" disabled={isLoading} className="flex-1">
+              {isLoading ? "Reservando..." : "Reservar"}
             </Button>
           </div>
         </form>

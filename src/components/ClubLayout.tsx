@@ -3,35 +3,37 @@
 import type React from "react";
 import { SeatComponent } from "./SeatComponent";
 import { ReservationModal } from "./ReservationModal";
+import LoginButton from "./LoginButton";
 // import Image from "next/image";
 
 export const ClubLayout: React.FC = () => {
   return (
     <div className="w-full h-screen bg-black relative">
-      <div className="absolute inset-0 bg-black flex items-center justify-center">
-  <img
-    src="/bg.jpg"
-    alt="Background"
-    className="max-h-full max-w-full object-contain"
-    style={{
-      WebkitMaskImage: `
+      <div className="absolute inset-0 flex items-center justify-center">
+        <img
+          src="/bg.jpg"
+          alt="Background"
+          className="max-h-full max-w-full object-contain"
+          style={{
+            WebkitMaskImage: `
         radial-gradient(circle at center, 
           rgba(0,0,0,1) 60%, 
           rgba(0,0,0,0) 100%)
       `,
-      maskImage: `
+            maskImage: `
         radial-gradient(circle at center, 
           rgba(0,0,0,1) 60%, 
           rgba(0,0,0,0) 100%)
       `,
-      WebkitMaskRepeat: "no-repeat",
-      maskRepeat: "no-repeat",
-      WebkitMaskSize: "100% 100%",
-      maskSize: "100% 100%",
-    }}
-  />
-</div>
+            WebkitMaskRepeat: "no-repeat",
+            maskRepeat: "no-repeat",
+            WebkitMaskSize: "100% 100%",
+            maskSize: "100% 100%",
+          }}
+        />
+      </div>
 
+      <LoginButton/>
 
       {/* Header */}
       <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-20 bg-black/80 p-2 rounded-lg">

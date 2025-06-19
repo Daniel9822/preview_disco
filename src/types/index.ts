@@ -20,7 +20,7 @@ export interface Reservation {
   stage: SectionType;
   customerFullName: string;
   customerPhoneNumber: string;
-  date: Date;
+  reservationDate: Date;
 }
 
 export interface ReservationFormData {
@@ -38,7 +38,8 @@ export interface ClubLayoutState {
 
 export interface ClubLayoutActions {
   selectSeat: (seatInfo: SeatInfo) => void;
-  reserveSeat: (formData: ReservationFormData) => Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  reserveSeat: (request: any, formData: ReservationFormData) => Promise<void>;
   closeModal: () => void;
   updateSeatStatus: (seatId: string, status: SeatStatus) => void;
   getSeatStatus: (seatId: string) => SeatStatus;
