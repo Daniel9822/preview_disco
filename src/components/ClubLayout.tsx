@@ -7,11 +7,17 @@ import LoginButton from "./LoginButton";
 import { useClubStore } from "@/store/clubStore";
 import { useEffect } from "react";
 import { useApiClient } from "@/lib/hooks/authClient";
+import { useAuth } from "@/lib/hooks/auth";
 import DataPicker from "./DataPicker";
+import { Button } from "./ui/button";
+import { Shield } from "lucide-react";
+import { useRouter } from "next/navigation";
 // import Image from "next/image";
 
 export const ClubLayout: React.FC = () => {
   const { request } = useApiClient();
+  const { session } = useAuth();
+  const router = useRouter();
   const { getReservations } = useClubStore();
 
   useEffect(() => {
@@ -32,13 +38,13 @@ export const ClubLayout: React.FC = () => {
           className="max-h-full max-w-full object-contain"
           style={{
             WebkitMaskImage: `
-        radial-gradient(circle at center, 
-          rgba(0,0,0,1) 60%, 
+        radial-gradient(circle at center,
+          rgba(0,0,0,1) 60%,
           rgba(0,0,0,0) 100%)
       `,
             maskImage: `
-        radial-gradient(circle at center, 
-          rgba(0,0,0,1) 60%, 
+        radial-gradient(circle at center,
+          rgba(0,0,0,1) 60%,
           rgba(0,0,0,0) 100%)
       `,
             WebkitMaskRepeat: "no-repeat",
@@ -53,6 +59,15 @@ export const ClubLayout: React.FC = () => {
         <div className="flex items-center gap-3">
           <LoginButton />
           <DataPicker />
+          {session && (
+            <Button
+              onClick={() => router.push("/admin")}
+              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700"
+            >
+              <Shield className="w-4 h-4" />
+              Admin
+            </Button>
+          )}
         </div>
       </div>
 
