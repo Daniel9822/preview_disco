@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
 import {
   type ClubLayoutState,
@@ -21,6 +22,43 @@ export const useClubStore = create<ClubLayoutState & ClubLayoutActions>(
     getSeatStatus: (seatId: string): SeatStatus => {
       const { seatStatuses } = get();
       return seatStatuses[seatId] || "available";
+    },
+
+    getReservations: (request: any, date: string) => {
+      const loading = toast.loading("Cargando reservas...", {
+        description: "Por favor espera mientras se cargan las reservas",
+      });
+
+      request(`${api}/reservations?date=${date}`, {
+        method: "GET",
+      }).then((response: any[]) => {
+        if (response?.length > 0) {
+          // Actualizar estado de asientos reservados
+          const reservedStatuses: Record<string, SeatStatus> = {};
+          response.forEach((reservation) => {
+            // Usar el id del asiento como clave, si tienes un mapping diferente ajústalo aquí
+            // Asumimos que 'stage' + '-' + 'seat' es el id, si no, usa solo seat si es único
+            // Ejemplo: 'vip-top-4'
+            const seatId = `${reservation.stage}-${reservation.seat}`;
+            reservedStatuses[seatId] = "reserved";
+          });
+
+          set((state) => ({
+            reservations: response,
+            seatStatuses: { ...state.seatStatuses, ...reservedStatuses },
+          }));
+          toast.success("Reservaciones actualizadas", {
+            description: '',
+            id: loading,
+          });
+        } else {
+          toast.info("No se encontraron reservaciones para esta fecha", {
+            description: "Puedes elegir cualquier asiento",
+            id: loading,
+          });
+          set({ seatStatuses: {} });
+        }
+      });
     },
 
     selectSeat: (seatInfo: SeatInfo) => {
@@ -47,20 +85,24 @@ export const useClubStore = create<ClubLayoutState & ClubLayoutActions>(
       });
     },
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     reserveSeat: async (request: any, formData: ReservationFormData) => {
       const { selectedSeat, seatStatuses } = get();
       if (!selectedSeat) return;
 
       set({ isLoading: true });
 
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, "0");
+      const dd = String(today.getDate()).padStart(2, "0");
+      const todayStr = `${yyyy}-${mm}-${dd}`;
       try {
         const reservation = {
           seat: selectedSeat.seatNumber,
           stage: selectedSeat.section,
           customerFullName: formData.fullName,
           customerPhoneNumber: formData.phoneNumber,
-          reservationDate: new Date(),
+          reservationDate: todayStr,
         };
 
         // Llamada al API
@@ -70,7 +112,6 @@ export const useClubStore = create<ClubLayoutState & ClubLayoutActions>(
             "Content-Type": "application/json",
           },
           body: JSON.stringify(reservation),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
         }).then((response: any) => {
           if (response?.id) {
             toast.success("¡Reserva realizada exitosamente!", {

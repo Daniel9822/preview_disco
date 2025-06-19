@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type SectionType =
   | "vip-left"
   | "vip-top"
@@ -20,12 +21,19 @@ export interface Reservation {
   stage: SectionType;
   customerFullName: string;
   customerPhoneNumber: string;
-  reservationDate: Date;
+  reservationDate: string;
+  creator?: Creator;
 }
 
 export interface ReservationFormData {
   fullName: string;
   phoneNumber: string;
+  
+}
+
+interface Creator {
+  name: string;
+  lastName: string;
 }
 
 export interface ClubLayoutState {
@@ -38,8 +46,8 @@ export interface ClubLayoutState {
 
 export interface ClubLayoutActions {
   selectSeat: (seatInfo: SeatInfo) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reserveSeat: (request: any, formData: ReservationFormData) => Promise<void>;
+  getReservations: (request: any, date: string) => void;
   closeModal: () => void;
   updateSeatStatus: (seatId: string, status: SeatStatus) => void;
   getSeatStatus: (seatId: string) => SeatStatus;

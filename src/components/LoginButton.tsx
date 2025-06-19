@@ -78,7 +78,7 @@ export default function LoginButton() {
 
   return (
     <>
-      <div className="absolute top-8 left-8 z-50">
+      <div>
         <Button
           className="flex items-center gap-2 text-white"
           onClick={() => setOpen(true)}

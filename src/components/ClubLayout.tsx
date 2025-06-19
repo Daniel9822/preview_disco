@@ -4,9 +4,25 @@ import type React from "react";
 import { SeatComponent } from "./SeatComponent";
 import { ReservationModal } from "./ReservationModal";
 import LoginButton from "./LoginButton";
+import { useClubStore } from "@/store/clubStore";
+import { useEffect } from "react";
+import { useApiClient } from "@/lib/hooks/authClient";
+import DataPicker from "./DataPicker";
 // import Image from "next/image";
 
 export const ClubLayout: React.FC = () => {
+  const { request } = useApiClient();
+  const { getReservations } = useClubStore();
+
+  useEffect(() => {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, "0");
+    const dd = String(today.getDate()).padStart(2, "0");
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+    getReservations(request, todayStr);
+  }, []);
+
   return (
     <div className="w-full h-screen bg-black relative">
       <div className="absolute inset-0 flex items-center justify-center">
@@ -33,7 +49,12 @@ export const ClubLayout: React.FC = () => {
         />
       </div>
 
-      <LoginButton/>
+      <div className="absolute top-8 left-8 z-50">
+        <div className="flex items-center gap-3">
+          <LoginButton />
+          <DataPicker />
+        </div>
+      </div>
 
       {/* Header */}
       <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-20 bg-black/80 p-2 rounded-lg">
