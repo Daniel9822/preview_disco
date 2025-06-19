@@ -17,6 +17,8 @@ import { useClubStore } from "@/store/clubStore";
 import type { ReservationFormData } from "@/types";
 import { toast } from "sonner";
 import { useApiClient } from "@/lib/hooks/authClient";
+import ReactDatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export const ReservationModal: React.FC = () => {
   const { selectedSeat, isModalOpen, isLoading, reserveSeat, closeModal } =
@@ -27,6 +29,7 @@ export const ReservationModal: React.FC = () => {
   });
   const { request } = useApiClient();
   const [errors, setErrors] = useState<Partial<ReservationFormData>>({});
+  const [date, setDate] = useState<Date | null>(new Date());
 
   const validateForm = (): boolean => {
     const newErrors: Partial<ReservationFormData> = {};
@@ -53,7 +56,9 @@ export const ReservationModal: React.FC = () => {
     if (!validateForm()) return;
 
     try {
-      await reserveSeat(request, formData);
+      if(!date) return
+      const formattedDate = date.toISOString().split("T")[0]; // Formato YYYY-MM-DD
+      await reserveSeat(request, formData, formattedDate);
 
       // Limpiar formulario
       setFormData({ fullName: "", phoneNumber: "" });
@@ -136,6 +141,16 @@ export const ReservationModal: React.FC = () => {
             {errors.phoneNumber && (
               <p className="text-sm text-red-500">{errors.phoneNumber}</p>
             )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phoneNumber">Seleccionar fecha</Label>
+            <ReactDatePicker
+                   selected={date}
+                   onChange={setDate}
+                   className="w-full h-10 px-3 rounded-md border"
+                   placeholderText="Seleccionar fecha"
+                   dateFormat="yyyy-MM-dd"
+                 />
           </div>
 
           <div className="flex gap-3 pt-4">

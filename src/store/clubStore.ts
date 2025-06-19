@@ -43,10 +43,10 @@ export const useClubStore = create<ClubLayoutState & ClubLayoutActions>(
             reservedStatuses[seatId] = "reserved";
           });
 
-          set((state) => ({
+          set({
             reservations: response,
-            seatStatuses: { ...state.seatStatuses, ...reservedStatuses },
-          }));
+            seatStatuses: { ...reservedStatuses },
+          });
           toast.success("Reservaciones actualizadas", {
             description: '',
             id: loading,
@@ -85,24 +85,19 @@ export const useClubStore = create<ClubLayoutState & ClubLayoutActions>(
       });
     },
 
-    reserveSeat: async (request: any, formData: ReservationFormData) => {
+    reserveSeat: async (request: any, formData: ReservationFormData, date) => {
       const { selectedSeat, seatStatuses } = get();
       if (!selectedSeat) return;
 
       set({ isLoading: true });
 
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = String(today.getMonth() + 1).padStart(2, "0");
-      const dd = String(today.getDate()).padStart(2, "0");
-      const todayStr = `${yyyy}-${mm}-${dd}`;
       try {
         const reservation = {
           seat: selectedSeat.seatNumber,
           stage: selectedSeat.section,
           customerFullName: formData.fullName,
           customerPhoneNumber: formData.phoneNumber,
-          reservationDate: todayStr,
+          reservationDate: date,
         };
 
         // Llamada al API
