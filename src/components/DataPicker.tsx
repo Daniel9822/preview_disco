@@ -5,7 +5,7 @@ import ReactDatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 export default function DataPicker() {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const { getReservations } = useClubStore();
   const { request } = useApiClient();
 
@@ -14,8 +14,6 @@ export default function DataPicker() {
   useEffect(() => {
     if (selectedDate) {
       const formattedDate = selectedDate.toISOString().split("T")[0]; // Formato YYYY-MM-DD
-      console.log({formattedDate})
-      console.log({selectedDate})
 
       getReservations(request, formattedDate);
     }
@@ -27,7 +25,7 @@ export default function DataPicker() {
         selected={selectedDate}
         onChange={setSelectedDate}
         className="w-full h-10 px-3 rounded-md border"
-        placeholderText="Seleccionar fecha"
+        placeholderText={`${new Date().toISOString().split("T")[0]}`}
         dateFormat="yyyy-MM-dd"
       />
     </div>

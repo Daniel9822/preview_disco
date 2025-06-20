@@ -8,6 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useAuth } from "@/lib/hooks/auth";
 
 interface SeatComponentProps {
   seatInfo: SeatInfo;
@@ -24,6 +25,7 @@ export const SeatComponent: React.FC<SeatComponentProps> = ({
 }) => {
   const { selectSeat, getSeatStatus, reservations } = useClubStore();
   const status = getSeatStatus(seatInfo.id);
+  const { session } = useAuth();
 
   // Buscar la reserva correspondiente a este asiento
   const reservation = reservations.find(
@@ -95,7 +97,7 @@ export const SeatComponent: React.FC<SeatComponentProps> = ({
     </div>
   );
 
-  if (status === "reserved" && reservation) {
+  if (status === "reserved" && reservation && session?.user?.name !== '') {
     return (
       <TooltipProvider>
         <Tooltip>
